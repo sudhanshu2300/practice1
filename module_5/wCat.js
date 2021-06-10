@@ -1,4 +1,6 @@
 let fs = require("fs");
+// object destructuring
+let {applySFlag , applyBFlag , applyNFlag} = require("./util");
 let input = process.argv.slice(2);
 
 let files = [];
@@ -6,9 +8,9 @@ let flags = [];
 
 for (let i = 0; i < input.length; i++) {
   if (input[i].startsWith("-")) {
-    flags.push(input[i]);
+    if(!flags.includes(input[i])) flags.push(input[i]);
   } else {
-    files.push(input[i]);
+      if(!files.includes(input[i])) files.push(input[i]);
   }
 }
 
@@ -18,32 +20,29 @@ for (let i = 0; i < input.length; i++) {
 let data = "";
 for(let i=0 ; i<files.length ; i++){
     let fileKaData = fs.readFileSync(files[i]);
-    data += i == files.length-1 ? fileKaData :  fileKaData+"\n";
+    data += i == files.length-1 ? fileKaData :  fileKaData+"\r\n";
 }
 
-// console.log(data);
 
-// -s flag
+if(flags.includes("-s")){
+    // data s flagged !!
+    data = applySFlag(data);
+}
 
-function applySFlag(){
-    let dataComp = data.split("\r\n");
-    // console.log(dataComp);
-    let sFlagedData = [];
-    let nonEmptyFound = false;
-    
-    for(let i=0 ; i<dataComp.length ; i++){
-        if(dataComp[i] != '' ){
-            sFlagedData.push(dataComp[i]);
-            nonEmptyFound = true;
-        }
-        else if(dataComp[i] == '' && dataComp[i-1] != '' && nonEmptyFound){
-            sFlagedData.push(dataComp[i]);
-        }
+
+if(flags.includes("-n") && flags.includes("-b")){
+    if(flags.indexOf("-n") < flags.indexOf("-b")){
+        data = applyNFlag(data);    
     }
-    let sFlagedString = sFlagedData.join("\r\n");
-    return sFlagedString;
+    else{
+        data = applyBFlag(data);
+    }
 }
-
-data = applySFlag();
+else if(flags.includes("-n")){
+    data = applyNFlag(data);
+}
+else if(flags.includes("-b")){
+    data = applyBFlag(data);
+}
 
 console.log(data);
